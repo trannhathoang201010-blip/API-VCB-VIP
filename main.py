@@ -5,8 +5,8 @@ import threading
 
 app = Flask(__name__)
 
-# --- CẤU HÌNH SỐ TÀI KHOẢN VIETCOMBANK CỦA FEN ---
-VCB_ACCOUNT = "3382962182"  
+# --- CẤU HÌNH SỐ TÀI KHOẢN VIETCOMBANK CỦA BẠN TẠI ĐÂY ---
+VCB_ACCOUNT = "3382962182"  # Số tài khoản của bạn (lấy từ ảnh thông báo)
 # -----------------------------------------------------
 
 history_logs = []
@@ -16,7 +16,7 @@ def fetch_vcb_history_loop():
     global history_logs
     print("🚀 Khởi động bot quét lịch sử Vietcombank tự động...")
     
-    # Sử dụng API miễn phí/ổn định để đọc lịch sử giao dịch VCB công khai
+    # Sử dụng API public/free ổn định để đọc lịch sử giao dịch VCB công khai
     api_url = f"https://api.web23s.com/api/vcb/{VCB_ACCOUNT}" 
     
     while True:
@@ -51,7 +51,7 @@ def fetch_vcb_history_loop():
 
 @app.route('/')
 def home():
-    return "Hệ thống tự động quét Vietcombank đang hoạt động ngầm!"
+    return "Hệ thống tự động quét Vietcombank đang hoạt động ngầm 24/7!"
 
 @app.route('/api/vcb-history', methods=['GET'])
 def get_history():
