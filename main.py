@@ -5,8 +5,8 @@ import threading
 
 app = Flask(__name__)
 
-# --- CẤU HÌNH TÀI KHOẢN VIETCOMBANK CỦA BẠN TẠI ĐÂY ---
-VCB_ACCOUNT = "3382962182"  # Số tài khoản của bạn (đã lấy từ ảnh)
+# --- CẤU HÌNH SỐ TÀI KHOẢN VIETCOMBANK CỦA FEN ---
+VCB_ACCOUNT = "3382962182"  
 # -----------------------------------------------------
 
 history_logs = []
@@ -16,26 +16,25 @@ def fetch_vcb_history_loop():
     global history_logs
     print("🚀 Khởi động bot quét lịch sử Vietcombank tự động...")
     
-    # Sử dụng API public/free để cào lịch sử giao dịch VCB công khai
+    # Sử dụng API miễn phí/ổn định để đọc lịch sử giao dịch VCB công khai
     api_url = f"https://api.web23s.com/api/vcb/{VCB_ACCOUNT}" 
     
     while True:
         try:
             response = requests.get(api_url, timeout=10)
             if response.status_code == 200:
-                data = response.get_json()
-                # Giả định API trả về danh sách giao dịch dạng mảng
+                data = response.json()
+                # Lấy danh sách giao dịch từ API trả về
                 transactions = data.get("transactions", []) or data.get("data", [])
                 
                 new_logs = []
                 for tx in transactions[:10]: # Lấy 10 giao dịch mới nhất
-                    # Tùy theo cấu trúc API trả về, ta bóc tách:
                     amount = tx.get("amount", "0")
                     description = tx.get("description", tx.get("content", ""))
                     tran_id = tx.get("tran_id", tx.get("reference", "Không rõ"))
                     
-                    # Chỉ lọc các giao dịch TIỀN VÀO (Cộng tiền)
-                    if "+" in str(amount) or int(amount) > 0:
+                    # Chỉ lọc các giao dịch cộng tiền vào (tiền vào tài khoản)
+                    if "+" in str(amount) or (isinstance(amount, (int, float)) and amount > 0):
                         new_logs.append({
                             "tran_id": tran_id,
                             "amount": f"+{amount} VND",
@@ -48,7 +47,7 @@ def fetch_vcb_history_loop():
         except Exception as e:
             print(f"⚠️ Lỗi khi quét API Vietcombank: {e}")
             
-        time.sleep(10) # 10 giây quét một lần
+        time.sleep(10) # Cứ 10 giây tự động quét một lần
 
 @app.route('/')
 def home():
@@ -61,7 +60,7 @@ def get_history():
         "transactions": history_logs
     }), 200
 
-# Chạy ngầm luồng quét ngân hàng song song với web
+# Kích hoạt luồng chạy ngầm song song với server web
 threading.Thread(target=fetch_vcb_history_loop, daemon=True).start()
 
 if __name__ == "__main__":
